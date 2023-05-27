@@ -6,7 +6,7 @@ class DBClient {
     this.dbName = process.env['DB_DATABASE'] || 'files_manager';
     this.client = new MongoClient(`mongodb://${host}:${port}/${this.dbName}`, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     });
 
     this.client
@@ -16,7 +16,7 @@ class DBClient {
   }
 
   isAlive() {
-    return this.client.isConnected;
+    return this.client.isConnected();
   }
 
   async nbUsers() {
