@@ -12,4 +12,6 @@ indexRoute.get('/connect', AuthController.getConnect);
 indexRoute.get('/disconnect', AuthController.getDisconnect);
 indexRoute.get('/users/me', UsersController.getMe);
 indexRoute.post('/files', FileController.postUpload);
+indexRoute.get('/files/:id', FileController.getShow);
+indexRoute.get('/files', FileController.getIndex);
 export default indexRoute;

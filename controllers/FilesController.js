@@ -84,7 +84,7 @@ async function postUpload(req = request, res = response) {
   }
   try {
     await fs.promises.writeFile(localPath, data, {
-      encoding: 'utf8',
+      encoding: 'base64',
     });
   } catch (error) {
     res.status(400).send({ error: 'unable to create file' });
@@ -111,8 +111,81 @@ async function postUpload(req = request, res = response) {
   });
 }
 
+async function getShow(req = request, res = response) {
+  const { id } = req.params;
+  const token = req.headers['x-token'];
+  const key = `auth_${token}`;
+  const userId = await redisClient.get(key);
+
+  if (!userId) {
+    res.status(401).send({ error: 'Unauthorized' });
+    return;
+  }
+
+  const file = await dbClient.collection('files').findOne({
+    _id: ObjectId(id),
+    userId: ObjectId(userId),
+  });
+
+  if (!file) {
+    res.status(404).send({ error: 'Not found' });
+    return;
+  }
+
+  res.send({
+    id: file._id,
+    userId: file.userId,
+    name: file.name,
+    type: file.type,
+    isPublic: file.isPublic,
+    parentId: file.parentId,
+  });
+}
+
+async function getIndex(req = request, res = response) {
+  const token = req.headers['x-token'];
+  const key = `auth_${token}`;
+  const userId = await redisClient.get(key);
+  const { parentId } = req.query;
+  const page = parseInt(req.query.page, 10) || 1;
+  const pageSize = 20;
+  const offset = (page - 1) * pageSize;
+
+  if (!userId) {
+    res.status(401).send({ error: 'Unauthorized' });
+    return;
+  }
+
+  const files = [];
+  const query = {
+    userId: ObjectId(userId),
+  };
+
+  if (parentId) {
+    query.parentId = ObjectId(parentId);
+  }
+  await dbClient
+    .collection('files')
+    .find(query)
+    .skip(offset)
+    .limit(pageSize)
+    .forEach((file) => {
+      files.push({
+        id: file._id,
+        userId: file.userId,
+        name: file.name,
+        type: file.type,
+        isPublic: file.isPublic,
+        parentId: file.parentId,
+      });
+    });
+  res.send(files);
+}
+
 const FileController = {
   postUpload,
+  getShow,
+  getIndex,
 };
 
 export default FileController;
