@@ -33,7 +33,7 @@ async function postNew(req, res) {
   res.status(201).send({ id: user._id, email: user.email });
 }
 
-async function me(req = request, res = response) {
+async function getMe(req = request, res = response) {
   const token = req.headers['x-token'];
   const key = `auth_${token}`;
   const userID = await redisClient.get(key);
@@ -55,7 +55,7 @@ async function me(req = request, res = response) {
 
 const UsersController = {
   postNew,
-  me,
+  getMe,
 };
 
 export default UsersController;

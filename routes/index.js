@@ -8,5 +8,5 @@ indexRoute.get('/stats', AppController.getStats);
 indexRoute.post('/users', UsersController.postNew);
 indexRoute.get('/connect', AppController.getConnect);
 indexRoute.get('/disconnect', AppController.getDisconnect);
-indexRoute.get('/users/me', UsersController.me);
+indexRoute.get('/users/me', UsersController.getMe);
 export default indexRoute;
