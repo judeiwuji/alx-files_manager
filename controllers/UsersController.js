@@ -1,25 +1,24 @@
-import { Request, Response } from 'express';
-import dbClient from '../utils/db';
 import sha1 from 'sha1';
-/**
- * @param {Request} req
- * @param {Response} res
- */
+import dbClient from '../utils/db';
+
 async function postNew(req, res) {
   const { email, password } = req.body;
 
   if (!email) {
-    return res.status(400).send({ error: 'Missing email' });
+    res.status(400).send({ error: 'Missing email' });
+    return;
   }
 
   if (!password) {
-    return res.status(400).send({ error: 'Missing password' });
+    res.status(400).send({ error: 'Missing password' });
+    return;
   }
 
   const emailExists = await dbClient.collection('users').findOne({ email });
 
   if (emailExists) {
-    return res.status(400).send({ error: 'Already exist' });
+    res.status(400).send({ error: 'Already exist' });
+    return;
   }
 
   const hashedPassword = sha1(password);
@@ -32,7 +31,7 @@ async function postNew(req, res) {
 }
 
 const UsersController = {
-  postNew
+  postNew,
 };
 
 export default UsersController;
