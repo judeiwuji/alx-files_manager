@@ -16,4 +16,5 @@ indexRoute.get('/files/:id', FileController.getShow);
 indexRoute.get('/files', FileController.getIndex);
 indexRoute.put('/files/:id/publish', FileController.putPublish);
 indexRoute.put('/files/:id/unpublish', FileController.putUnpublish);
+indexRoute.get('/files/:id/data', FileController.getFile);
 export default indexRoute;
