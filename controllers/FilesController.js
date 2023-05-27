@@ -150,7 +150,6 @@ async function getIndex(req = request, res = response) {
   const page = parseInt(req.query.page, 10) || 0;
   const pageSize = 20;
   const offset = page * pageSize;
-  console.log(offset);
   if (!userId) {
     res.status(401).send({ error: 'Unauthorized' });
     return;
@@ -182,10 +181,86 @@ async function getIndex(req = request, res = response) {
   res.send(files);
 }
 
+async function putPublish(req = request, res = response) {
+  const { id } = req.params;
+  const token = req.headers['x-token'];
+  const key = `auth_${token}`;
+  const userId = await redisClient.get(key);
+  if (!userId) {
+    res.status(401).send({ error: 'Unauthorized' });
+    return;
+  }
+
+  const file = await dbClient.collection('files').findOne({
+    _id: ObjectId(id),
+    userId: ObjectId(userId),
+  });
+
+  if (!file) {
+    res.status(404).send({ error: 'Not found' });
+    return;
+  }
+
+  await dbClient.collection('files').updateOne(
+    {
+      _id: ObjectId(id),
+      userId: ObjectId(userId),
+    },
+    { $set: { isPublic: true } },
+  );
+  res.send({
+    id: file._id,
+    userId: file.userId,
+    name: file.name,
+    type: file.type,
+    isPublic: true,
+    parentId: file.parentId,
+  });
+}
+
+async function putUnpublish(req = request, res = response) {
+  const { id } = req.params;
+  const token = req.headers['x-token'];
+  const key = `auth_${token}`;
+  const userId = await redisClient.get(key);
+  if (!userId) {
+    res.status(401).send({ error: 'Unauthorized' });
+    return;
+  }
+
+  const file = await dbClient.collection('files').findOne({
+    _id: ObjectId(id),
+    userId: ObjectId(userId),
+  });
+
+  if (!file) {
+    res.status(404).send({ error: 'Not found' });
+    return;
+  }
+
+  await dbClient.collection('files').updateOne(
+    {
+      _id: ObjectId(id),
+      userId: ObjectId(userId),
+    },
+    { $set: { isPublic: false } },
+  );
+  res.send({
+    id: file._id,
+    userId: file.userId,
+    name: file.name,
+    type: file.type,
+    isPublic: false,
+    parentId: file.parentId,
+  });
+}
+
 const FileController = {
   postUpload,
   getShow,
   getIndex,
+  putPublish,
+  putUnpublish,
 };
 
 export default FileController;
