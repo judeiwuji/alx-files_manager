@@ -55,11 +55,11 @@ async function postUpload(req = request, res = response) {
 
   if (type === 'folder') {
     const { insertedId } = await dbClient.collection('files').insertOne({
-      userId,
+      userId: ObjectId(userId),
       name,
       type,
       isPublic: isPublic || false,
-      parentId: parentId || 0,
+      parentId: parentId ? ObjectId(parentId) : 0,
     });
     const file = await dbClient
       .collection('files')
@@ -75,7 +75,7 @@ async function postUpload(req = request, res = response) {
     return;
   }
 
-  const targetPath = path.join(process.env.FOLDER_PATH || '/tmp/files_manager');
+  const targetPath = process.env.FOLDER_PATH || '/tmp/files_manager';
   const localPath = path.join(targetPath, uuidV4());
   try {
     await fs.promises.mkdir(targetPath, { recursive: true });
@@ -92,11 +92,11 @@ async function postUpload(req = request, res = response) {
   }
 
   const { insertedId } = await dbClient.collection('files').insertOne({
-    userId,
+    userId: ObjectId(userId),
     name,
     type,
     isPublic: isPublic || false,
-    parentId: parentId || 0,
+    parentId: parentId ? ObjectId(parentId) : 0,
     localPath,
   });
 
