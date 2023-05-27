@@ -10,7 +10,7 @@ async function postUpload(req = request, res = response) {
   const token = req.headers['x-token'];
   const key = `auth_${token}`;
   const userId = await redisClient.get(key);
-  const allowTypes = ['folder', 'file', 'image'];
+  const allowedTypes = ['folder', 'file', 'image'];
 
   if (!userId) {
     res.status(401).send({ error: 'Unauthorized' });
@@ -28,7 +28,7 @@ async function postUpload(req = request, res = response) {
     return;
   }
 
-  if (!allowTypes.includes(type)) {
+  if (!allowedTypes.includes(type)) {
     res.status(400).send({ error: 'Missing type' });
     return;
   }
@@ -67,7 +67,7 @@ async function postUpload(req = request, res = response) {
     res.status(201).send({
       id: file._id,
       userId: file.userId,
-      name: file.bane,
+      name: file.name,
       type: file.type,
       isPublic: file.isPublic,
       parentId: file.parentId,
@@ -91,7 +91,7 @@ async function postUpload(req = request, res = response) {
     return;
   }
 
-  const result = await dbClient.collection('files').insertOne({
+  const { insertedId } = await dbClient.collection('files').insertOne({
     userId,
     name,
     type,
@@ -100,9 +100,7 @@ async function postUpload(req = request, res = response) {
     localPath,
   });
 
-  const file = await dbClient
-    .collection('files')
-    .findOne({ _id: result.insertedId });
+  const file = await dbClient.collection('files').findOne({ _id: insertedId });
   res.status(201).send({
     id: file._id,
     userId: file.userId,
