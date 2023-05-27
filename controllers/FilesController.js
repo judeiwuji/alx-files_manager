@@ -147,10 +147,10 @@ async function getIndex(req = request, res = response) {
   const key = `auth_${token}`;
   const userId = await redisClient.get(key);
   const { parentId } = req.query;
-  const page = parseInt(req.query.page, 10) || 1;
+  const page = parseInt(req.query.page, 10) || 0;
   const pageSize = 20;
-  const offset = (page - 1) * pageSize;
-
+  const offset = page * pageSize;
+  console.log(offset);
   if (!userId) {
     res.status(401).send({ error: 'Unauthorized' });
     return;
