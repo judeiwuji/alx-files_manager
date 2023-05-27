@@ -9,15 +9,18 @@ class DBClient {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
+    this._connected = false;
 
     this.client
       .connect()
-      .then(() => {})
+      .then(() => {
+        this._connected = true;
+      })
       .catch((err) => console.log(err));
   }
 
   isAlive() {
-    return this.client.isConnected();
+    return this._connected;
   }
 
   async nbUsers() {

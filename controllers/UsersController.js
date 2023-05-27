@@ -1,5 +1,5 @@
 import sha1 from 'sha1';
-// import { request, response } from 'express';
+import { request, response } from 'express';
 import { ObjectId } from 'mongodb';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
@@ -33,7 +33,7 @@ async function postNew(req, res) {
   res.status(201).send({ id: user._id, email: user.email });
 }
 
-async function getMe(req, res) {
+async function getMe(req = request, res = response) {
   const token = req.headers['x-token'];
   const key = `auth_${token}`;
   const userID = await redisClient.get(key);
