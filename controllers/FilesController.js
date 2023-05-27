@@ -288,14 +288,12 @@ async function getFile(req = request, res = response) {
   const mimeType = mime.lookup(file.name);
 
   res.header('Content-Type', mimeType);
+  const base64 = await fs.promises.readFile(file.localPath);
   if (file.type === 'file') {
-    const base64 = await fs.promises.readFile(file.localPath, {
-      encoding: 'utf-8',
-    });
-    res.send(Buffer.from(base64, 'base64').toString());
+    res.send(Buffer.from(base64.toString(), 'base64').toString());
     return;
   }
-  const base64 = await fs.promises.readFile(file.localPath);
+
   res.send(base64);
 }
 
