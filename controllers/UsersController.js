@@ -33,7 +33,7 @@ async function postNew(req, res) {
   res.status(201).send({ id: user._id, email: user.email });
 }
 
-async function getMe(req = request, res = response) {
+async function getMe(req, res) {
   const token = req.headers['x-token'];
   const key = `auth_${token}`;
   const userID = await redisClient.get(key);
