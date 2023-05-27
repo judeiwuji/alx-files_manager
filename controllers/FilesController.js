@@ -10,20 +10,25 @@ async function postUpload(req = request, res = response) {
   const token = req.headers['x-token'];
   const key = `auth_${token}`;
   const userId = await redisClient.get(key);
+  const allowTypes = ['folder', 'file', 'image'];
 
   if (!userId) {
     res.status(401).send({ error: 'Unauthorized' });
     return;
   }
-  // eslint-disable-next-line object-curly-newline
-  const { name, type, parentId, isPublic, data } = req.body;
+
+  const { name } = req.body;
+  const { type } = req.body;
+  const { parentId } = req.body;
+  const { isPublic } = req.body;
+  const { data } = req.body;
 
   if (!name) {
     res.status(400).send({ error: 'Missing name' });
     return;
   }
 
-  if (!type) {
+  if (!allowTypes.includes(type)) {
     res.status(400).send({ error: 'Missing type' });
     return;
   }
