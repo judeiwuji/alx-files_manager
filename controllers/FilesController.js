@@ -285,14 +285,18 @@ async function getFile(req = request, res = response) {
     res.status(404).send({ error: 'Not found' });
     return;
   }
-
-  const base64 = await fs.promises.readFile(file.localPath, {
-    encoding: 'utf-8',
-  });
   const mimeType = mime.lookup(file.name);
-  console.log(base64);
+
   res.header('Content-Type', mimeType);
-  res.send(Buffer.from(base64, 'base64').toString());
+  if (file.type === 'file') {
+    const base64 = await fs.promises.readFile(file.localPath, {
+      encoding: 'utf-8',
+    });
+    res.send(Buffer.from(base64, 'base64').toString());
+    return;
+  }
+  const base64 = await fs.promises.readFile(file.localPath);
+  res.send(base64);
 }
 
 const FileController = {
