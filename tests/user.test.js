@@ -2,7 +2,7 @@ import request from 'request';
 import { expect } from 'chai';
 
 const baseUrl = `http://localhost:5000`;
-describe('User Endpoints', () => {
+describe('Users Endpoints', () => {
   let email = '';
   let password = '';
   describe('postNew', () => {
