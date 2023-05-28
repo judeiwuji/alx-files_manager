@@ -1,8 +1,11 @@
 import sha1 from 'sha1';
 import { request, response } from 'express';
 import { ObjectId } from 'mongodb';
+import Queue from 'bull';
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
+
+const userQueue = Queue('push-notification');
 
 async function postNew(req, res) {
   const { email, password } = req.body;
@@ -29,6 +32,7 @@ async function postNew(req, res) {
     .collection('users')
     .insertOne({ email, password: hashedPassword });
   const user = await dbClient.collection('users').findOne({ _id: insertedId });
+  userQueue.add('push-email', { userId: insertedId.toString() });
 
   res.status(201).send({ id: user._id, email: user.email });
 }
