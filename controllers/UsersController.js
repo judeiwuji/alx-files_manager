@@ -37,7 +37,7 @@ async function getMe(req = request, res = response) {
   const token = req.headers['x-token'];
   const key = `auth_${token}`;
   const userID = await redisClient.get(key);
-  console.log(userID);
+
   if (!userID) {
     res.status(401).send({ error: 'Unauthorized' });
     return;
