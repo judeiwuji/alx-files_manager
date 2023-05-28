@@ -4,9 +4,11 @@ import { request, response } from 'express';
 import { ObjectId } from 'mongodb';
 import { v4 as uuidV4 } from 'uuid';
 import mime from 'mime-types';
+import Queue from 'bull';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
+const fileQueue = new Queue('file transcoding');
 async function postUpload(req = request, res = response) {
   const token = req.headers['x-token'];
   const key = `auth_${token}`;
@@ -102,6 +104,13 @@ async function postUpload(req = request, res = response) {
   });
 
   const file = await dbClient.collection('files').findOne({ _id: insertedId });
+
+  if (file.type === 'image') {
+    fileQueue.add('image-thumbnail', {
+      userId,
+      fileId: file._id.toString(),
+    });
+  }
   res.status(201).send({
     id: file._id,
     userId: file.userId,
@@ -261,6 +270,7 @@ async function getFile(req = request, res = response) {
   const token = req.headers['x-token'];
   const key = `auth_${token}`;
   const userId = await redisClient.get(key);
+  const { size } = req.query;
 
   const file = await dbClient
     .collection('files')
@@ -281,20 +291,26 @@ async function getFile(req = request, res = response) {
     return;
   }
 
-  if (!fs.existsSync(file.localPath)) {
+  let { localPath } = file;
+
+  if (size) {
+    localPath = `${localPath}_${size}`;
+  }
+
+  if (!fs.existsSync(localPath)) {
     res.status(404).send({ error: 'Not found' });
     return;
   }
   const mimeType = mime.lookup(file.name);
 
   res.header('Content-Type', mimeType);
-  const base64 = await fs.promises.readFile(file.localPath);
+  const base64 = await fs.promises.readFile(localPath);
   if (file.type === 'file') {
     res.send(Buffer.from(base64.toString(), 'base64').toString());
     return;
   }
 
-  res.send(base64);
+  res.sendFile(localPath);
 }
 
 const FileController = {
