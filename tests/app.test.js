@@ -1,8 +1,5 @@
 import request from 'request';
 import { expect } from 'chai';
-import sinon from 'sinon';
-import dbClient from '../utils/db';
-import redisClient from '../utils/redis';
 
 const baseUrl = `http://localhost:5000`;
 describe('App Endpoints', () => {

@@ -26,7 +26,7 @@ async function getConnect(req = request, res = response) {
   res.send({ token });
 }
 
-async function getDisconnect(req = request, res = response) {
+async function getDisconnect(req, res) {
   const token = req.headers['x-token'];
 
   const key = `auth_${token}`;
